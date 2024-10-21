@@ -2,7 +2,8 @@
   "name": "crossmint-challenge-jorgemartinez",
   "version": "1.0.0",
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "format": "biome format --write src"
   },
   "author": "JorgeCoke",
   "dependencies": {
@@ -10,6 +11,7 @@
     "tsx": "^4.19.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^22.7.7"
   }
 }
