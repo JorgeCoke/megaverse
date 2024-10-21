@@ -1,0 +1,11 @@
+{
+  "name": "crossmint-challenge-jorgemartinez",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx src/index.ts"
+  },
+  "author": "JorgeCoke",
+  "dependencies": {
+    "tsx": "^4.19.1"
+  }
+}
