@@ -1,4 +1,4 @@
-import "dotenv/config";
+import { env } from "./lib/env";
 
 console.log("HELLO CROSSMINT!");
-console.log(process.env.API_BASE_URL);
+console.log(env.API_BASE_URL);
