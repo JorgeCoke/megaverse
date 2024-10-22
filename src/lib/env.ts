@@ -3,7 +3,7 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-	API_BASE_URL: z.string().min(1),
+	MEGAVERSE_API_BASE_URL: z.string().min(1),
 	CANDIDATE_ID: z.string().min(1),
 });
 
