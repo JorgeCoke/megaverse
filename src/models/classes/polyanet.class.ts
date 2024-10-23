@@ -1,9 +1,8 @@
-import { CellType } from "../enum/cell-type.enum";
-import type { Coords } from "../interfaces/coords.interface";
-import { Cell } from "./cell.class";
+import type { CellType } from "../enum/cell-type.enum";
+import { Cell, type MegaverseCell } from "./cell.class";
 
-export class Polyanet extends Cell {
-	constructor(coords: Coords) {
-		super(coords, "🪐", CellType.POLYANET);
-	}
+export class Polyanet extends Cell implements MegaverseCell {
+	type: CellType.POLYANET;
+
+	// NOTE: We can omit the constructor here
 }
