@@ -1,22 +1,22 @@
-type GoalSpaceCell = "SPACE";
-type GoalPolyanetCell = "POLYANET";
-type GoalComethCell =
+type GoalSpaceAstro = "SPACE";
+type GoalPolyanetAstro = "POLYANET";
+type GoalComethAstro =
 	| "UP_COMETH"
 	| "LEFT_COMETH"
 	| "RIGHT_COMETH"
 	| "DOWN_COMETH";
-type GoalSoloonCell =
+type GoalSoloonAstro =
 	| "WHITE_SOLOON"
 	| "RED_SOLOON"
 	| "BLUE_SOLOON"
 	| "PURPLE_SOLOON";
 
-export type CellGoal =
-	| GoalSpaceCell
-	| GoalPolyanetCell
-	| GoalComethCell
-	| GoalSoloonCell;
+export type AstroGoal =
+	| GoalSpaceAstro
+	| GoalPolyanetAstro
+	| GoalComethAstro
+	| GoalSoloonAstro;
 
 export type GetMegaverseMapGoalDto = {
-	goal: CellGoal[][];
+	goal: AstroGoal[][];
 };

@@ -1,14 +1,14 @@
-import type { CellType } from "../enum/cell-type.enum";
-import type { Coords } from "../interfaces/coords.interface";
+import { AstroType } from "../enum/astro-type.enum";
+import type { Coords } from "../types/coords.type";
 import type { SoloonColor } from "../types/soloon-color.type";
-import { Cell, type MegaverseCell } from "./cell.class";
+import { Astro } from "./astro.class";
 
-export class Soloon extends Cell implements MegaverseCell {
-	type: CellType.SOLOON;
+export class Soloon extends Astro<AstroType.SOLOON> {
 	color: SoloonColor;
 
-	constructor(coords: Coords, color: SoloonColor) {
+	constructor(coords?: Coords, color?: SoloonColor) {
 		super(coords);
+		this.type = AstroType.SOLOON;
 		this.color = color;
 	}
 }

@@ -1,18 +1,25 @@
-import { env } from "../../lib/env";
-import { http } from "../../lib/http";
-import { sleep } from "../../lib/utils";
-import { CellType } from "../../models/enum/cell-type.enum";
-import { deleteCometh, postCometh } from "../comeths/comeths.facade";
-import { deletePolyanet, postPolyanet } from "../polyanets/polyanets.facade";
-import { deleteSoloon, postSoloon } from "../soloons/soloons.facade";
+import { inject, injectable } from "inversify";
+import { Env } from "../../lib/env";
+import { Http } from "../../lib/http";
 import type { GetMegaverseMapGoalDto } from "./dtos/get-megaverse-map-goal.dto";
-import type {
-	GetMegaverseMapDto,
-	MegaverseMap,
-} from "./dtos/get-megaverse-map.dto";
+import type { GetMegaverseMapDto } from "./dtos/get-megaverse-map.dto";
 
-export const getMegaverseMapGoal = () =>
-	http<GetMegaverseMapGoalDto>(`/map/${env.CANDIDATE_ID}/goal`);
+@injectable()
+export class MegaverseFacade {
+	constructor(
+		@inject(Env) private readonly env: Env,
+		@inject(Http) private readonly http: Http,
+	) {}
 
-export const getMegaverseMap = () =>
-	http<GetMegaverseMapDto>(`/map/${env.CANDIDATE_ID}`);
+	public getMegaverseMapGoal() {
+		return this.http.megaverse<GetMegaverseMapGoalDto>(
+			`/map/${this.env.CANDIDATE_ID}/goal`,
+		);
+	}
+
+	public getMegaverseMap() {
+		return this.http.megaverse<GetMegaverseMapDto>(
+			`/map/${this.env.CANDIDATE_ID}`,
+		);
+	}
+}

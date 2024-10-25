@@ -1,8 +1,10 @@
-import type { CellType } from "../enum/cell-type.enum";
-import { Cell, type MegaverseCell } from "./cell.class";
+import { AstroType } from "../enum/astro-type.enum";
+import type { Coords } from "../types/coords.type";
+import { Astro } from "./astro.class";
 
-export class Polyanet extends Cell implements MegaverseCell {
-	type: CellType.POLYANET;
-
-	// NOTE: We can omit the constructor here
+export class Polyanet extends Astro<AstroType.POLYANET> {
+	constructor(coords?: Coords) {
+		super(coords);
+		this.type = AstroType.POLYANET;
+	}
 }

@@ -1,15 +1,18 @@
 {
   "name": "crossmint-challenge-jorgemartinez",
   "version": "1.0.0",
+  "author": "JorgeCoke",
   "scripts": {
     "phase1": "tsx src/phase1.ts",
     "phase2": "tsx src/phase2.ts",
+    "build": "tsc --noEmit",
     "format": "biome format --write src"
   },
-  "author": "JorgeCoke",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "inversify": "^6.0.3",
     "ofetch": "^1.4.1",
+    "reflect-metadata": "^0.2.2",
     "tsx": "^4.19.1",
     "zod": "^3.23.8"
   },

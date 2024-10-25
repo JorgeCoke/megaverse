@@ -1,182 +1,232 @@
-import { deleteCometh, postCometh } from "../facades/comeths/comeths.facade";
-import type { CellGoal } from "../facades/megaverse/dtos/get-megaverse-map-goal.dto";
+import { inject, injectable } from "inversify";
+import type { AstroGoal } from "../facades/megaverse/dtos/get-megaverse-map-goal.dto";
 import type {
 	MegaverseMap,
-	MegaverseMapContentCell,
+	MegaverseMapContentAstro,
 } from "../facades/megaverse/dtos/get-megaverse-map.dto";
-import {
-	deletePolyanet,
-	postPolyanet,
-} from "../facades/polyanets/polyanets.facade";
-import { deleteSoloon, postSoloon } from "../facades/soloons/soloons.facade";
-import { sleep } from "../lib/utils";
-import { CellType } from "../models/enum/cell-type.enum";
-import type { Coords } from "../models/interfaces/coords.interface";
 
-export const clearMegaverseMap = async (megaverseMap: MegaverseMap) => {
-	for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
-		const row = megaverseMap.content[rowIndex];
-		for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-			const cell = row[columnIndex];
-			if (cell) {
-				switch (cell.type) {
-					case CellType.POLYANET:
-						await deletePolyanet({ row: rowIndex, column: columnIndex });
-						break;
-					case CellType.SOLOON:
-						await deleteSoloon({ row: rowIndex, column: columnIndex });
-						break;
-					case CellType.COMETH:
-						await deleteCometh({ row: rowIndex, column: columnIndex });
-						break;
-					default:
-						throw new Error(`Unknown megaverseMap Cell Type: ${cell}`);
+import { AstroType } from "../models/enum/astro-type.enum";
+import { AstroFacadeFactory } from "../facades/astros/astro-facade.factory";
+import { AstroDirector } from "../models/classes/directors/astro.director";
+import type { Coords } from "../models/types/coords.type";
+
+@injectable()
+export class MegaverseService {
+	constructor(
+		@inject(AstroFacadeFactory)
+		private readonly astroFacadeFactory: AstroFacadeFactory,
+		@inject(AstroDirector) private readonly astroDirectior: AstroDirector,
+	) {}
+
+	/**
+	 * Clears all astro objects from the provided megaverse map.
+	 * Iterates through each cell in the map, identifies the astro type, and deletes it using the appropriate facade.
+	 * @param megaverseMap The map containing astro objects to be cleared.
+	 */
+	public async clearMegaverseMap(megaverseMap: MegaverseMap) {
+		for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
+			const row = megaverseMap.content[rowIndex];
+			for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+				const astro = row[columnIndex];
+				if (astro) {
+					const coords: Coords = { row: rowIndex, column: columnIndex };
+					await this.astroFacadeFactory.getFacade(astro.type).delete(coords);
 				}
-				await sleep(1000);
 			}
 		}
 	}
-};
 
-export const fillMegaverseMapRandomly = async (megaverseMap: MegaverseMap) => {
-	for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
-		const row = megaverseMap.content[rowIndex];
-		for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-			const random = Math.random();
-			if (random > 0.9) {
-				await postPolyanet({ row: rowIndex, column: columnIndex });
-				await sleep(1000);
-			} else if (random > 0.8) {
-				await postSoloon(
+	/**
+	 * Populates the megaverse map with random astro objects at random coordinates.
+	 * Iterates through each cell in the map, randomly deciding whether to create an astro object based on probability.
+	 * @param megaverseMap The map to be filled with randomly placed astro objects.
+	 */
+	public async fillMegaverseMapRandomly(megaverseMap: MegaverseMap) {
+		for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
+			const row = megaverseMap.content[rowIndex];
+			for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+				const random = Math.random();
+				if (random > 0.9) {
+					const polyanet = this.astroDirectior.buildPolyanet({
+						row: rowIndex,
+						column: columnIndex,
+					});
+					await this.astroFacadeFactory
+						.getFacade(AstroType.POLYANET)
+						.post(polyanet);
+				} else if (random > 0.8) {
+					const soloon = this.astroDirectior.buildRedSoloon({
+						row: rowIndex,
+						column: columnIndex,
+					});
+					await this.astroFacadeFactory
+						.getFacade(AstroType.SOLOON)
+						.post(soloon);
+				} else if (random > 0.7) {
+					const cometh = this.astroDirectior.buildUpCometh({
+						row: rowIndex,
+						column: columnIndex,
+					});
+					await this.astroFacadeFactory
+						.getFacade(AstroType.COMETH)
+						.post(cometh);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adjusts the MegaverseMap to align with the specified Goal by correcting any mismatched cells.
+	 * Iterates through each cell in the MegaverseMap, comparing it with the corresponding cell in the Goal.
+	 * If a discrepancy is found, it fixes the cell to match the Goal, ensuring the map conforms to the desired state.
+	 * @param megaverseMap The current state of the MegaverseMap to be adjusted.
+	 * @param goal The target configuration that the MegaverseMap should match.
+	 */
+	public async generateCrossMintMegaverse(
+		megaverseMap: MegaverseMap,
+		goal: AstroGoal[][],
+	) {
+		for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
+			const row = megaverseMap.content[rowIndex];
+			for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+				await this.fixAstro(
+					megaverseMap.content[rowIndex][columnIndex],
+					goal[rowIndex][columnIndex],
 					{ row: rowIndex, column: columnIndex },
-					random > 0.85 ? "blue" : "white",
 				);
-				await sleep(1000);
-			} else if (random > 0.7) {
-				await postCometh(
-					{ row: rowIndex, column: columnIndex },
-					random > 0.75 ? "down" : "up",
-				);
-				await sleep(1000);
 			}
 		}
 	}
-};
 
-export const generateCrossMintMegaverse = async (
-	megaverseMap: MegaverseMap,
-	goal: CellGoal[][],
-) => {
-	for (let rowIndex = 0; rowIndex < megaverseMap.content.length; rowIndex++) {
-		const row = megaverseMap.content[rowIndex];
-		for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-			const response = await fixCell(
-				megaverseMap.content[rowIndex][columnIndex],
-				goal[rowIndex][columnIndex],
-				{ row: rowIndex, column: columnIndex },
-			);
-			if (response !== undefined) {
-				await sleep(1000);
-			}
+	/**
+	 * Ensures that the specified cell in the Megaverse map matches the desired goal type.
+	 * If the source cell type does not align with the goal cell type, this method updates the cell
+	 * to match the goal by either deleting or creating the appropriate astro object.
+	 * @param source The current astro object present at the specified coordinates in the Megaverse map.
+	 * @param goal The desired astro goal type that the cell should match.
+	 * @param coords The coordinates of the cell to be checked and potentially updated.
+	 * @returns A promise that resolves once the adjustment operation is completed, if needed.
+	 */
+	public async fixAstro(
+		source: MegaverseMapContentAstro,
+		goal: AstroGoal,
+		coords: Coords,
+	) {
+		switch (goal) {
+			case "SPACE":
+				if (source?.type) {
+					return await this.astroFacadeFactory
+						.getFacade(source.type)
+						.delete(coords);
+				}
+				break;
+			case "POLYANET":
+				if (!source || source.type !== AstroType.POLYANET) {
+					const polyanet = this.astroDirectior.buildPolyanet(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.POLYANET)
+						.post(polyanet);
+				}
+				break;
+			case "RED_SOLOON":
+				if (
+					!source ||
+					source.type !== AstroType.SOLOON ||
+					source.color !== "red"
+				) {
+					const soloon = this.astroDirectior.buildRedSoloon(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.SOLOON)
+						.post(soloon);
+				}
+				break;
+			case "WHITE_SOLOON":
+				if (
+					!source ||
+					source.type !== AstroType.SOLOON ||
+					source.color !== "white"
+				) {
+					const soloon = this.astroDirectior.buildWhiteSoloon(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.SOLOON)
+						.post(soloon);
+				}
+				break;
+			case "PURPLE_SOLOON":
+				if (
+					!source ||
+					source.type !== AstroType.SOLOON ||
+					source.color !== "purple"
+				) {
+					const soloon = this.astroDirectior.buildPurpleSoloon(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.SOLOON)
+						.post(soloon);
+				}
+				break;
+			case "BLUE_SOLOON":
+				if (
+					!source ||
+					source.type !== AstroType.SOLOON ||
+					source.color !== "blue"
+				) {
+					const soloon = this.astroDirectior.buildBlueSoloon(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.SOLOON)
+						.post(soloon);
+				}
+				break;
+			case "UP_COMETH":
+				if (
+					!source ||
+					source.type !== AstroType.COMETH ||
+					source.direction !== "up"
+				) {
+					const cometh = this.astroDirectior.buildUpCometh(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.COMETH)
+						.post(cometh);
+				}
+				break;
+			case "DOWN_COMETH":
+				if (
+					!source ||
+					source.type !== AstroType.COMETH ||
+					source.direction !== "down"
+				) {
+					const cometh = this.astroDirectior.buildDownCometh(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.COMETH)
+						.post(cometh);
+				}
+				break;
+			case "RIGHT_COMETH":
+				if (
+					!source ||
+					source.type !== AstroType.COMETH ||
+					source.direction !== "right"
+				) {
+					const cometh = this.astroDirectior.buildRightCometh(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.COMETH)
+						.post(cometh);
+				}
+				break;
+			case "LEFT_COMETH":
+				if (
+					!source ||
+					source.type !== AstroType.COMETH ||
+					source.direction !== "left"
+				) {
+					const cometh = this.astroDirectior.buildLeftCometh(coords);
+					return await this.astroFacadeFactory
+						.getFacade(AstroType.COMETH)
+						.post(cometh);
+				}
+				break;
+			default:
+				throw new Error(`Error. Unexpected AstroGoal type: ${goal}`);
 		}
+		return null;
 	}
-};
-
-const fixCell = async (
-	source: MegaverseMapContentCell,
-	goal: CellGoal,
-	coords: Coords,
-) => {
-	switch (goal) {
-		case "SPACE":
-			if (source?.type === CellType.POLYANET) {
-				return await deletePolyanet(coords);
-			}
-			if (source?.type === CellType.SOLOON) {
-				return await deleteSoloon(coords);
-			}
-			if (source?.type === CellType.COMETH) {
-				return await deleteCometh(coords);
-			}
-			break;
-		case "POLYANET":
-			if (!source || source.type !== CellType.POLYANET) {
-				return await postPolyanet(coords);
-			}
-			break;
-		case "RED_SOLOON":
-			if (
-				!source ||
-				source.type !== CellType.SOLOON ||
-				source.color !== "red"
-			) {
-				return await postSoloon(coords, "red");
-			}
-			break;
-		case "WHITE_SOLOON":
-			if (
-				!source ||
-				source.type !== CellType.SOLOON ||
-				source.color !== "white"
-			) {
-				return await postSoloon(coords, "white");
-			}
-			break;
-		case "PURPLE_SOLOON":
-			if (
-				!source ||
-				source.type !== CellType.SOLOON ||
-				source.color !== "purple"
-			) {
-				return await postSoloon(coords, "purple");
-			}
-			break;
-		case "BLUE_SOLOON":
-			if (
-				!source ||
-				source.type !== CellType.SOLOON ||
-				source.color !== "blue"
-			) {
-				return await postSoloon(coords, "blue");
-			}
-			break;
-		case "UP_COMETH":
-			if (
-				!source ||
-				source.type !== CellType.COMETH ||
-				source.direction !== "up"
-			) {
-				return await postCometh(coords, "up");
-			}
-			break;
-		case "DOWN_COMETH":
-			if (
-				!source ||
-				source.type !== CellType.COMETH ||
-				source.direction !== "down"
-			) {
-				return await postCometh(coords, "down");
-			}
-			break;
-		case "RIGHT_COMETH":
-			if (
-				!source ||
-				source.type !== CellType.COMETH ||
-				source.direction !== "right"
-			) {
-				return await postCometh(coords, "right");
-			}
-			break;
-		case "LEFT_COMETH":
-			if (
-				!source ||
-				source.type !== CellType.COMETH ||
-				source.direction !== "left"
-			) {
-				return await postCometh(coords, "left");
-			}
-			break;
-		default:
-			throw new Error(`Error. Unexpected Cell Goal type: ${goal}`);
-	}
-};
+}

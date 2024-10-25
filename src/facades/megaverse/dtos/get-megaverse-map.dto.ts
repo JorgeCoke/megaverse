@@ -1,4 +1,4 @@
-import type { CellType } from "../../../models/enum/cell-type.enum";
+import type { AstroType } from "../../../models/enum/astro-type.enum";
 import type { ComethDirection } from "../../../models/types/cometh-direction.type";
 import type { SoloonColor } from "../../../models/types/soloon-color.type";
 
@@ -14,12 +14,12 @@ export type MegaverseMap = {
 	__v: number;
 };
 
-export type MegaverseMapContent = MegaverseMapContentCell[][];
+export type MegaverseMapContent = MegaverseMapContentAstro[][];
 
-export type MegaverseMapContentCell =
+export type MegaverseMapContentAstro =
 	| {
-			type: CellType.POLYANET;
+			type: AstroType.POLYANET;
 	  }
-	| { type: CellType.SOLOON; color: SoloonColor }
-	| { type: CellType.COMETH; direction: ComethDirection }
+	| { type: AstroType.SOLOON; color: SoloonColor }
+	| { type: AstroType.COMETH; direction: ComethDirection }
 	| null;
