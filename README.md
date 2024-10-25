@@ -10,6 +10,7 @@ npm run phase1          # Executes phase1.ts script
 npm run phase2          # Executes phase2.ts script
 npm run format          # Run Biome formatter
 npm run build           # Build source files
+npm run test            # Run tests
 ```
 
 ## 1️⃣ Phase 1
@@ -44,6 +45,10 @@ Even though each astro currently has only a few parameters, I implemented a Buil
 
 Additionally, an Inversion of Control (IoC) library for dependency injection is essential for any scalable project. For this reason, I integrated "InversifyJS," a widely-used tool in such scenarios. It simplifies the process of injecting dependencies into each service, making the architecture cleaner and more maintainable.
 
+## Testing
+
+I have implemented a series of tests using Vitest. While not all parts of the code are covered, I focused on creating tests for the more complex sections to ensure their reliability. The test files are: "astro-facade.factory.test.ts", "cometh.builder.test.ts", "astro.director.test.ts", and "megaverse.service.test.ts"
+
 ## 📝 NOTES
 
 Initially, my approach was to use Promise.allSettled to send multiple API requests in parallel, in order to improve performance. However, the API had strict rate limits and often returned a 429 (Too Many Requests) error. In some cases, it even responded with a 200 status code but still failed to process the requests correctly (?¿). Trying to fix this, I implemented a chunking mechanism that limited parallel requests to about 5 at a time, but the API continued to deny my calls. Ultimately, I could have used a sleep function to introduce delays between requests, but the retry mechanism introduced with "ofetch" was working fine, so I decided to go with this approach. Another alternative could have been implementing a debounce queue, but I opted to keep things simpler for now.
@@ -54,4 +59,4 @@ Type safety is crucial for me, and that's why I avoid using any in all my projec
 
 I believe that code should be self-explanatory, minimizing the need for unnecessary comments. Therefore, I focused on commenting the more complex methods in this challenge while avoiding comments on those that I felt were straightforward and did not require additional explanations. Regarding the "fixAstro" method, I agree that it's quite long, but its logic needs to be consolidated in one place. In this case, I chose to keep all the functionality within a single method rather than splitting it across multiple files.
 
-Additionally, I discovered that the challenge documentation at [https://challenge.crossmint.com/documentation](https://challenge.crossmint.com/documentation) is accessible without a candidateId. By disabling JavaScript in the browser, the page is accesible. It seems some validation is performed on the client side after the view is rendered (?¿)
+Additionally, I discovered that the challenge documentation at "/documentation" is accessible without a candidateId. By disabling JavaScript in the browser, the page is accesible. It seems some validation is performed on the client side after the view is rendered (?¿)

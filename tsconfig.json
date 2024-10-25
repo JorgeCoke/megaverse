@@ -3,7 +3,7 @@
     "target": "es5",
     "outDir": "dist",
     "lib": ["es6", "dom"],
-    "types": ["reflect-metadata", "node"],
+    "types": ["reflect-metadata", "node", "vitest/globals"],
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,

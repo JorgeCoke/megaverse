@@ -6,7 +6,8 @@
     "phase1": "tsx src/phase1.ts",
     "phase2": "tsx src/phase2.ts",
     "build": "tsc --noEmit",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "test": "vitest --coverage"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.7.7"
+    "@types/node": "^22.7.7",
+    "@vitest/coverage-v8": "^2.1.3",
+    "vitest": "^2.1.3"
   }
 }
